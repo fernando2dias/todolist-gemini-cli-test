@@ -482,3 +482,12 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Frontend (Next.js)
+todo-web/node_modules/
+todo-web/.next/
+todo-web/out/
+todo-web/build/
+todo-web/.vercel/
+todo-web/*.tsbuildinfo
+todo-web/next-env.d.ts
