@@ -24,14 +24,35 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<TodoContext>(opt =>
-    opt.UseInMemoryDatabase("TodoList"));
+    opt.UseNpgsql(connectionString));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Migrate database automatically with retries
+for (int i = 0; i < 10; i++)
+{
+    try
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<TodoContext>();
+            db.Database.Migrate();
+        }
+        break; // Success
+    }
+    catch (Exception ex)
+    {
+        if (i == 9) throw;
+        Log.Warning("Aguardando o banco de dados ficar pronto... tentativa {tentativa}", i + 1);
+        System.Threading.Thread.Sleep(3000);
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

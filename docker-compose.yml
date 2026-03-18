@@ -1,4 +1,18 @@
 services:
+  db:
+    image: postgres:15-alpine
+    container_name: todo-db
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - todo-db-data:/var/lib/postgresql/data
+    networks:
+      - todo-network
+
   backend:
     build:
       context: .
@@ -9,6 +23,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5021
+      - ConnectionStrings__DefaultConnection=Host=db;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+    depends_on:
+      - db
     networks:
       - todo-network
 
@@ -27,3 +44,6 @@ services:
 networks:
   todo-network:
     driver: bridge
+
+volumes:
+  todo-db-data:

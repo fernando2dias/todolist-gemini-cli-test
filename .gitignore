@@ -491,3 +491,6 @@ todo-web/build/
 todo-web/.vercel/
 todo-web/*.tsbuildinfo
 todo-web/next-env.d.ts
+
+# Environment variables
+.env
