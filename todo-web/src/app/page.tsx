@@ -6,11 +6,13 @@ interface TodoItem {
   id: number;
   name: string;
   isComplete: boolean;
+  dueDate?: string;
 }
 
 export default function Home() {
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [newName, setNewName] = useState('');
+  const [newDueDate, setNewDueDate] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   const API_URL = 'http://localhost:5021/api/Todo';
@@ -40,10 +42,11 @@ export default function Home() {
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newName, isComplete: false }),
+        body: JSON.stringify({ name: newName, isComplete: false, dueDate: newDueDate || null }),
       });
       if (response.ok) {
         setNewName('');
+        setNewDueDate('');
         fetchTodos();
       }
     } catch (error) {
@@ -81,8 +84,10 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg border border-gray-100 p-8">
-        <h1 className="text-3xl font-bold mb-8 text-indigo-700 text-center">ToDo List</h1>
+      <div className="max-w-xl mx-auto bg-white rounded-xl shadow-lg border border-gray-100 p-8">
+        <h1 className="text-3xl font-bold mb-8 text-indigo-700 text-center">
+          Tarefas do Fernando
+        </h1>
         
         <form onSubmit={addTodo} className="mb-8 flex gap-2">
           <input
@@ -90,6 +95,15 @@ export default function Home() {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="Nova tarefa..."
+            className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-800 bg-gray-50"
+          />
+
+          <label htmlFor="dueDate" className="sr-only">Data de Vencimento</label>
+          <input
+            type="date"
+            id="dueDate"
+            value={newDueDate}
+            onChange={(e) => setNewDueDate(e.target.value)}
             className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-gray-800 bg-gray-50"
           />
           <button
@@ -116,9 +130,16 @@ export default function Home() {
                     onChange={() => toggleComplete(todo)}
                     className="w-6 h-6 accent-indigo-600 cursor-pointer rounded-md"
                   />
-                  <span className={`text-lg font-medium ${todo.isComplete ? 'line-through text-gray-400' : 'text-gray-700'}`}>
-                    {todo.name}
-                  </span>
+                  <div>
+                    <span className={`text-lg font-medium ${todo.isComplete ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                      {todo.name}
+                    </span>
+                    {todo.dueDate && (
+                      <p className="text-sm text-gray-500">
+                        Vence em: {new Date(todo.dueDate).toLocaleDateString('pt-BR')}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={() => deleteTodo(todo.id)}
